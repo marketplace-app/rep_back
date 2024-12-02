@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Predio(models.Model):
@@ -20,11 +21,24 @@ class Imovel(models.Model):
         ('CASA', 'Casa'),
         ('APARTAMENTO', 'Apartamento'),
     ]
+    STATUS_CHOICES = [
+        ('DISPONIVEL', 'Disponível'),
+        ('RESERVADO', 'Reservado'),
+        ('VENDIDO', 'Vendido'),
+        ('ALUGADO', 'Alugado'),
+    ]
     
     
     descricao = models.TextField()
     valor = models.DecimalField(max_digits=10, decimal_places=2)  
     tipo = models.CharField(max_length=15, choices=TIPOS_IMOVEL)
+    
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default= 'DISPONIVEL'
+    )
+    
     predio = models.ForeignKey(
         Predio,
         on_delete=models.SET_NULL,
@@ -32,7 +46,18 @@ class Imovel(models.Model):
         blank=True,
         db_column='predio_id'
     )
+
     endereco = models.CharField(max_length=255)
+
+   # Apenas como exemplo.
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        db_column= 'user_id'
+    )
+
 
     class Meta:
         db_table = 'imovel'
@@ -41,6 +66,9 @@ class Imovel(models.Model):
 
     def __str__(self):
         return f"{self.tipo}: {self.descricao}"
+    
+    def _str_(self):
+        return self.nome
 
     def clean(self):
         from django.core.exceptions import ValidationError

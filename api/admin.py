@@ -20,3 +20,4 @@ class ImovelAdmin(admin.ModelAdmin):
 class ImagemAdmin(admin.ModelAdmin):
     list_display = ('imovel', 'url')
     search_fields = ('url',)
+    
