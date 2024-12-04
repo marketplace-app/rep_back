@@ -12,15 +12,15 @@ from rest_framework.response import Response
 class PredioViewSet(ModelViewSet):
     serializer_class = PredioSerializer
     queryset = Predio.objects.all()
-    #authentication_classes = [JWTAuthentication]
-    #permission_classes = [IsAuthenticated]
+ #   authentication_classes = [JWTAuthentication]
+ #   permission_classes = [IsAuthenticated]
 
 
 class ImovelViewSet(ModelViewSet):
     serializer_class = ImovelSerializer
     queryset = Imovel.objects.all()
-    #authentication_classes = [JWTAuthentication]
-    #permission_classes = [IsAuthenticated]
+   # authentication_classes = [JWTAuthentication]
+   # permission_classes = [IsAuthenticated]
 
 
 
@@ -51,8 +51,8 @@ class HomeViewSet(ModelViewSet):
 class ImagemViewSet(ModelViewSet):
     serializer_class = ImagemSerializer
     queryset = Imagem.objects.all()
-    #authentication_classes = [JWTAuthentication]
-    #permission_classes = [IsAuthenticated]
+ #   authentication_classes = [JWTAuthentication]
+ #   permission_classes = [IsAuthenticated]
 
 
 
