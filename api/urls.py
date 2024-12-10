@@ -4,6 +4,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import PredioViewSet, ImovelViewSet, ImagemViewSet, UserViewSet, HomeViewSet
 from rest_framework.routers import DefaultRouter
 
+from django.conf import settings
+from django.conf.urls.static import static
 
 router = DefaultRouter(trailing_slash=False)
 
@@ -21,4 +23,4 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('', include(router.urls))
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

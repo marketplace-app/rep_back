@@ -76,14 +76,15 @@ class Imovel(models.Model):
             raise ValidationError("O campo 'predio' é obrigatório para imóveis do tipo 'APARTAMENTO'.")
 
 
-class Imagem(models.Model):
+
     
+class Imagem(models.Model):
     imovel = models.ForeignKey(
         Imovel,
         on_delete=models.CASCADE,
         related_name='imagens'
     )
-    url = models.URLField() 
+    imagem = models.ImageField(upload_to='imoveis/', null=True, blank=True)
 
     class Meta:
         db_table = 'imagem'
@@ -91,4 +92,4 @@ class Imagem(models.Model):
         verbose_name_plural = 'Imagens'
 
     def __str__(self):
-        return self.url
+        return self.imagem.name if self.imagem else "Sem imagem!"

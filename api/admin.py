@@ -18,6 +18,5 @@ class ImovelAdmin(admin.ModelAdmin):
 
 @admin.register(Imagem)
 class ImagemAdmin(admin.ModelAdmin):
-    list_display = ('imovel', 'url')
-    search_fields = ('url',)
-    
+    list_display = ('imovel', 'imagem') 
+    search_fields = ('imagem',)  

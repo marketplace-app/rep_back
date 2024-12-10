@@ -16,12 +16,22 @@ class PredioViewSet(ModelViewSet):
  #   permission_classes = [IsAuthenticated]
 
 
+
+class ImovelViewSet(ModelViewSet):
+    serializer_class = ImovelSerializer
+    queryset = Imovel.objects.all()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+'''
 class ImovelViewSet(ModelViewSet):
     serializer_class = ImovelSerializer
     queryset = Imovel.objects.all()
    # authentication_classes = [JWTAuthentication]
    # permission_classes = [IsAuthenticated]
-
+'''
 
 
 class HomeViewSet(ModelViewSet):
