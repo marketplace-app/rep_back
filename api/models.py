@@ -20,7 +20,7 @@ class Empresa(models.Model):
             raise ValidationError("O campo 'nome' é obrigatório.")
 
 class UsuarioEmpresa(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='empresa_relacionada')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='empresa_relacionada')
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='usuarios')
 
     class Meta:
