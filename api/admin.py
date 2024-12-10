@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import Predio, Imovel, Imagem
+from .models import Predio, Imovel, Imagem, Empresa, UsuarioEmpresa
 
-
+admin.site.register(Empresa)
+admin.site.register(UsuarioEmpresa)
 
 @admin.register(Predio)
 class PredioAdmin(admin.ModelAdmin):
@@ -12,7 +13,7 @@ class PredioAdmin(admin.ModelAdmin):
 @admin.register(Imovel)
 class ImovelAdmin(admin.ModelAdmin):
     list_display = ('descricao', 'valor', 'tipo', 'predio', 'endereco')
-    list_filter = ('tipo',)  
+    list_filter = ('tipo', 'empresa','status')   
     search_fields = ('descricao', 'endereco')
 
 

@@ -1,7 +1,7 @@
 
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-from .views import PredioViewSet, ImovelViewSet, ImagemViewSet, UserViewSet, HomeViewSet
+from .views import PredioViewSet, ImovelViewSet, ImagemViewSet, UserViewSet, HomeViewSet,  PublicViewSet
 from rest_framework.routers import DefaultRouter
 
 from django.conf import settings
@@ -14,7 +14,7 @@ router.register('imoveis', ImovelViewSet, basename='imoveis')
 router.register('imagens', ImagemViewSet, basename='imagens')
 router.register('usuarios', UserViewSet, basename='usuarios')
 router.register('home', HomeViewSet, basename='home')
-
+router.register('publica', PublicViewSet, basename='publica')
 
 
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Imovel, Predio, Imagem
+from .models import Imovel, Predio, Imagem, Empresa
 from django.contrib.auth.models import User
 
 # Serializer para Predio
@@ -14,6 +14,7 @@ class ImovelSerializer(serializers.ModelSerializer):
     predio = PredioSerializer()
     imagens = serializers.SerializerMethodField()
     proprietario = serializers.SerializerMethodField()
+    
     def get_imagens(self, instance):
         # Verifica se o imóvel tem imagens associadas antes de tentar acessar a URL
         if instance.imagens.exists():
@@ -22,7 +23,7 @@ class ImovelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Imovel
-        fields = ['id', 'descricao', 'valor', 'tipo', 'predio', 'endereco', 'imagens', 'status', 'proprietario']
+        fields = ['id', 'descricao', 'valor', 'tipo', 'predio', 'endereco', 'imagens', 'status', 'proprietario', 'empresa']
 
     def get_proprietario(self, instance):
         if instance.usuario:
@@ -45,3 +46,10 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
+        
+
+class EmpresaSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Empresa
+        fields = "__all__" 

@@ -1,7 +1,38 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
+
+class Empresa(models.Model):
+    nome = models.CharField(max_length=255)
+    status = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'empresa'
+        verbose_name = 'empresa'
+        verbose_name_plural = 'empresas'
+
+    def __str__(self):
+        return self.nome
+    
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if not self.nome:
+            raise ValidationError("O campo 'nome' é obrigatório.")
+
+class UsuarioEmpresa(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='empresa_relacionada')
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='usuarios')
+
+    class Meta:
+        db_table = 'usuario_empresa'
+        verbose_name = 'Usuário e Empresa'
+        verbose_name_plural = 'Usuários e Empresas'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.empresa.nome}"
+
+
+
 class Predio(models.Model):
    
     descricao = models.CharField(max_length=255)
@@ -56,6 +87,13 @@ class Imovel(models.Model):
         null=True, 
         blank=True,
         db_column= 'user_id'
+    )
+    empresa = models.ForeignKey(  
+        Empresa,
+        on_delete=models.SET_NULL,
+        null=True,  
+        blank=True,
+        db_column= 'empresa_id'
     )
 
 
