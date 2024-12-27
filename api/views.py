@@ -37,10 +37,11 @@ class ImovelViewSet(ModelViewSet):
 
         if user.is_authenticated:
             # Usuário autenticado
-            if hasattr(user, 'empresa_relacionada') and user.empresa_relacionada.empresa:
+            print(user.empresa_relacionada)
+            if hasattr(user, 'empresa_relacionada'):
                 # Usuário tem empresa associada: retorna imóveis dessa empresa
-                empresa = user.empresa_relacionada.empresa
-                return Imovel.objects.filter(empresa=empresa)
+                empresa = user.empresa_relacionada.all().values_list('empresa_id', flat=True)
+                return Imovel.objects.filter(empresa__id__in=list(empresa))
             else:
                 # Usuário autenticado, mas sem empresa associada
                 return Imovel.objects.none()  # Nenhum imóvel será retornado
