@@ -5,22 +5,31 @@ from django.contrib.auth.models import User
 class Empresa(models.Model):
     nome = models.CharField(max_length=255)
     status = models.BooleanField(default=True)
+    proprietario = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='criador_id',
+        related_name='empresas_criadas'  # Identifica quem criou a empresa
+    )
 
     class Meta:
         db_table = 'empresa'
         verbose_name = 'empresa'
         verbose_name_plural = 'empresas'
 
-    def __str__(self):
-        return self.nome
+    def __str__(self):  
+        return self.nome  
     
     def clean(self):
         from django.core.exceptions import ValidationError
         if not self.nome:
             raise ValidationError("O campo 'nome' é obrigatório.")
 
+
 class UsuarioEmpresa(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='empresa_relacionada')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='empresas_associadas')
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='usuarios')
 
     class Meta:
@@ -28,8 +37,8 @@ class UsuarioEmpresa(models.Model):
         verbose_name = 'Usuário e Empresa'
         verbose_name_plural = 'Usuários e Empresas'
 
-    def __str__(self):
-        return f"{self.user.username} - {self.empresa.nome}"
+    def __str__(self):  # Correção do método __str__
+        return f"{self.user.username} - {self.empresa.nome}"  
 
 
 

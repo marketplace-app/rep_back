@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from .serializers import PredioSerializer, ImovelSerializer, ImagemSerializer, UserSerializer,  EmpresaSerializer
+from .serializers import PredioSerializer, ImovelSerializer, ImagemSerializer, UserSerializer, EmpresaSerializer
 from .models import Predio, Imovel, Imagem, UsuarioEmpresa, Empresa
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -12,17 +12,8 @@ from rest_framework import status
 class PredioViewSet(ModelViewSet):
     serializer_class = PredioSerializer
     queryset = Predio.objects.all()
- #   authentication_classes = [JWTAuthentication]
- #   permission_classes = [IsAuthenticated]
 
 
-'''
-class ImovelViewSet(ModelViewSet):
-    serializer_class = ImovelSerializer
-    queryset = Imovel.objects.all()
-   # authentication_classes = [JWTAuthentication]
-   # permission_classes = [IsAuthenticated]
-'''
 class ImovelViewSet(ModelViewSet):
     serializer_class = ImovelSerializer
     queryset = Imovel.objects.all()
@@ -36,71 +27,114 @@ class ImovelViewSet(ModelViewSet):
         user = self.request.user
 
         if user.is_authenticated:
-            # Usuário autenticado
+
             print(user.empresa_relacionada)
             if hasattr(user, 'empresa_relacionada'):
-                # Usuário tem empresa associada: retorna imóveis dessa empresa
-                empresa = user.empresa_relacionada.all().values_list('empresa_id', flat=True)
-                return Imovel.objects.filter(empresa__id__in=list(empresa))
+                # Usuário tem empresa associada: retorna imóveis dessa empres
+                empresas = user.empresa_relacionada.all().values_list('empresa_id', flat=True)
+                return Imovel.objects.filter(empresa__id__in=list(empresas))
             else:
-                # Usuário autenticado, mas sem empresa associada
-                return Imovel.objects.none()  # Nenhum imóvel será retornado
+                
+                return Imovel.objects.none()  
         else:
-            # Usuário não autenticado: retorna todos os imóveis
+            
             return Imovel.objects.all()
 
     def get_serializer_context(self):
+        """
+        Adiciona o request ao contexto para gerar URLs completas no serializer.
+        """
         context = super().get_serializer_context()
         context.update({"request": self.request})
         return context
 
- # def get_queryset(self):
-        # return Imovel.objects.filter(status='DISPONIVEL')
-  
-class PublicViewSet(ViewSet):
+    def create(self, request, *args, **kwargs):
+        """
+        Sobrescreve o método create para verificar autenticação antes de criar um imóvel.
+        """
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "É necessário estar autenticado para criar um imóvel."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        """
+        Associa o imóvel ao usuário autenticado durante a criação.
+        """
+        serializer.save(usuario=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "É necessário estar autenticado para atualizar um imóvel."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        instance = self.get_object()
+        if instance.usuario != request.user:
+            return Response(
+                {"error": "Você só pode editar imóveis que você criou."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().update(request, *args, **kwargs)
 
 
-    @action(methods=['get'], detail=False)
-    def imoveis(self, request, *args, **kwargs):
-        
-        imoveis = Imovel.objects.filter(status='DISPONIVEL')
-        serializer = ImovelSerializer(imoveis, many=True, context={'request': request})
-        return Response (serializer.data)
-
-    @action(methods=['get'], detail=False)
-    def contador_imoveis(self, request, *args, **kwargs):
-        
-        # Realiza as contagens de imóveis com os status solicitados
-        imoveis = Imovel.objects.all()
-        alugados = imoveis.filter(status='DISPONIVEL').count()
-        reservados = imoveis.filter(status='RESERVADO').count()
-        vendidos = imoveis.filter(status='VENDIDO').count()
-
-        # Monta a resposta com os dados agregados
-        data = {
-            'alugados': alugados,
-            'reservados': reservados,
-            'vendidos': vendidos,
-        }
-
-        return Response(data, status=200)      
-       
-
-
-class HomeViewSet(ViewSet):
-    # Usamos ModelViewSet mas não vamos criar nem atualizar objetos diretamente
+class EmpresaViewSet(ModelViewSet):
+    queryset = Empresa.objects.all()
+    serializer_class = EmpresaSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def list(self, request, *args, **kwargs):
+    def perform_create(self, serializer):
+        """
+        Associa o imóvel ao usuário autenticado durante a criação.
+        """
+        if self.request.user.is_authenticated:
+            serializer.save(proprietario=self.request.user)
+        else:
+            return Response(
+                status=status.HTTP_403_FORBIDDEN)
 
-        # Realiza as contagens de imóveis com os status solicitados
+
+    def update(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "É necessário estar autenticado para atualizar a empresa."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        instance = self.get_object()
+        if instance.proprietario != request.user:
+            return Response(
+                {"error": "Você só pode editar empresa que você criou."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().update(request, args, * kwargs)
+
+class PublicViewSet(ViewSet):
+    @action(methods=['get'], detail=False)
+    def imoveis(self, request, *args, **kwargs):
+        """
+        Lista imóveis com status 'DISPONIVEL' para todos os usuários.
+        """
+        imoveis = Imovel.objects.filter(status='DISPONIVEL')
+        serializer = ImovelSerializer(imoveis, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=False)
+    def contador_imoveis(self, request, *args, **kwargs):
+        """
+        Conta imóveis por status.
+        """
         imoveis = Imovel.objects.all()
         alugados = imoveis.filter(status='DISPONIVEL').count()
         reservados = imoveis.filter(status='RESERVADO').count()
         vendidos = imoveis.filter(status='VENDIDO').count()
 
-        # Monta a resposta com os dados agregados
         data = {
             'alugados': alugados,
             'reservados': reservados,
@@ -110,39 +144,55 @@ class HomeViewSet(ViewSet):
         return Response(data, status=200)
 
 
+class HomeViewSet(ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        """
+        Contagem de imóveis por status.
+        """
+        imoveis = Imovel.objects.all()
+        alugados = imoveis.filter(status='DISPONIVEL').count()
+        reservados = imoveis.filter(status='RESERVADO').count()
+        vendidos = imoveis.filter(status='VENDIDO').count()
+
+        data = {
+            'alugados': alugados,
+            'reservados': reservados,
+            'vendidos': vendidos,
+        }
+
+        return Response(data, status=200)
+
 
 class ImagemViewSet(ModelViewSet):
     serializer_class = ImagemSerializer
     queryset = Imagem.objects.all()
- #   authentication_classes = [JWTAuthentication]
- #   permission_classes = [IsAuthenticated]
-
 
 
 class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
-
 
     @action(methods=['get'], detail=True)
     def imoveis(self, request, pk=None, *args, **kwargs):
-        
+        """
+        Lista imóveis associados às empresas do usuário.
+        """
         empresas = UsuarioEmpresa.objects.filter(user=pk).values_list('empresa', flat=True)
         imoveis = Imovel.objects.filter(empresa__in=empresas)
         serializer = ImovelSerializer(imoveis, many=True, context={'request': request})
-    
-        return Response (serializer.data)
+
+        return Response(serializer.data)
 
     @action(methods=['get'], detail=True)
     def empresas(self, request, pk=None, *args, **kwargs):
-        
+        """
+        Lista empresas associadas ao usuário.
+        """
         empresas_fk = UsuarioEmpresa.objects.filter(user=pk).values_list('empresa', flat=True)
         empresas = Empresa.objects.filter(pk__in=empresas_fk)
         serializer = EmpresaSerializer(empresas, many=True)
-    
-        return Response (serializer.data)
 
-
-  
+        return Response(serializer.data)
