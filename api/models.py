@@ -29,7 +29,7 @@ class Empresa(models.Model):
 
 
 class UsuarioEmpresa(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='empresas_associadas')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='empresa_relacionada')
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='usuarios')
 
     class Meta:

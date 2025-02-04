@@ -19,26 +19,21 @@ class ImovelViewSet(ModelViewSet):
     queryset = Imovel.objects.all()
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
-    
+     
+    """Define a lógica para retornar os imóveis com base na autenticação do usuário. """
     def get_queryset(self):
-        """
-        Define a lógica para retornar os imóveis com base na autenticação do usuário.
-        """
         user = self.request.user
+        print(user)
 
         if user.is_authenticated:
-
-            print(user.empresa_relacionada)
             if hasattr(user, 'empresa_relacionada'):
                 # Usuário tem empresa associada: retorna imóveis dessa empres
                 empresas = user.empresa_relacionada.all().values_list('empresa_id', flat=True)
-                return Imovel.objects.filter(empresa__id__in=list(empresas))
+                return Imovel.objects.filter(empresa__id__in=list(empresas)).order_by('id')
             else:
-                
                 return Imovel.objects.none()  
         else:
-            
-            return Imovel.objects.all()
+            return Imovel.objects.all().order_by('id')
 
     def get_serializer_context(self):
         """
