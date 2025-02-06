@@ -27,7 +27,19 @@ class Empresa(models.Model):
         if not self.nome:
             raise ValidationError("O campo 'nome' é obrigatório.")
 
+class Client(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        db_column='user_id',
+        related_name='client'
+    )
+    cpf = models.CharField(max_length=14, unique=True)
 
+    class Meta:
+        db_table = 'client'
+        verbose_name = 'client'
+        verbose_name_plural = 'clients'  
 class UsuarioEmpresa(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='empresa_relacionada')
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='usuarios')

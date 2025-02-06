@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from .serializers import PredioSerializer, ImovelSerializer, ImagemSerializer, UserSerializer, EmpresaSerializer
-from .models import Predio, Imovel, Imagem, UsuarioEmpresa, Empresa
+from .serializers import PredioSerializer, ImovelSerializer, ImagemSerializer, UserSerializer, EmpresaSerializer, ClientSerializer
+from .models import Predio, Imovel, Imagem, UsuarioEmpresa, Empresa, Client
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -109,6 +109,30 @@ class EmpresaViewSet(ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         return super().update(request, args, * kwargs)
+
+class ClientViewSet(ModelViewSet):
+    serializer_class = ClientSerializer
+    queryset = Client.objects.all().order_by('id')
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        if hasattr(request.user, 'client'):
+            return Response(
+                {"error": "Você já é um Cliente"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def list(self, request, *args, **kwargs):
+        clientes = Client.objects.all()
+        serializer = self.get_serializer(clientes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class PublicViewSet(ViewSet):
     @action(methods=['get'], detail=False)

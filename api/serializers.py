@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Imovel, Predio, Imagem, Empresa
+from .models import Imovel, Predio, Imagem, Empresa, Client
 from django.contrib.auth.models import User
 
 # Serializer para Predio
@@ -40,6 +40,21 @@ class EmpresaSimplificadaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Empresa
         fields = ['id', 'nome']  
+
+class ClientSerializer(serializers.ModelSerializer):
+    nome = serializers.CharField(source='user.username', read_only=True)  # Nome vem do User
+
+    class Meta:
+        model = Client
+        fields = ['nome', 'cpf']  
+    
+    def validate_cpf(self, value):
+        """
+        Valida se o CPF já existe na base de dados e exibe uma mensagem personalizada.
+        """
+        if Client.objects.filter(cpf=value).exists():
+            raise serializers.ValidationError("Este CPF já está em uso por outro cliente.")
+        return value
 
 
 # Serializer para Imovel
