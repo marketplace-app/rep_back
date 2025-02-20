@@ -1,9 +1,5 @@
 env/
 *.pyc
-** /__pycache__/
-<<<<<<< Updated upstream
+**/__pycache__/
 media/
 migrations/
-=======
-media/
->>>>>>> Stashed changes
