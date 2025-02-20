@@ -19,7 +19,8 @@ class EmpresaSimplificadaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nome']  
 
 from rest_framework import serializers
-from .models import Imovel, Predio, Imagem, Empresa
+from .models import Imovel, Predio, Imagem, Empresa, Client
+
 from django.contrib.auth.models import User
 
 
@@ -110,7 +111,28 @@ class ImovelSerializer(serializers.ModelSerializer):
             'id', 'descricao', 'valor', 'tipo', 'predio', 'predio_detalhes', 'endereco', 
             'imagens', 'status', 'proprietario', 'empresa', 'empresa_detalhes'
         ]
+        
+    """Validações personalizadas para o campo 'predio' quando o tipo do imóvel for 'APARTAMENTO'."""
+    def validate(self, data):
 
+        tipo = data.get('tipo', None)
+        predio = data.get('predio', None)
+
+        if tipo == 'APARTAMENTO' and not predio:
+            raise serializers.ValidationError({
+                'predio': "O campo 'predio' é obrigatório para imóveis do tipo 'APARTAMENTO'."
+            })
+        return data
+
+    class Meta:
+        model = Imovel
+        fields = [
+            'id', 'descricao', 'valor', 'tipo', 'predio', 'predio_detalhes', 'endereco', 
+            'imagens', 'status', 'proprietario', 'empresa', 'empresa_detalhes'
+        ]
+
+
+# Serializer para Imagem
 class ImagemSerializer(serializers.ModelSerializer):
     imovel = ImovelSerializer()
 

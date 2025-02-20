@@ -248,7 +248,7 @@ class ContratoViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         valor_pago = serializer.validated_data['valor_pago']
         parcela.valor_pago = valor_pago  # Define o valor exato pago
-        parcela.data_pagamento = timezone.now().date()  #
+        parcela.data_pagamento = timezone.now().date()  
         
         if parcela.valor_pago >= parcela.valor:
             parcela.status = 'Pago'
