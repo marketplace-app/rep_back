@@ -163,11 +163,9 @@ class PublicViewSet(ViewSet):
 class HomeViewSet(ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-
+   
+    """Contagem de imóveis por status."""
     def list(self, request, *args, **kwargs):
-        """
-        Contagem de imóveis por status.
-        """
         imoveis = Imovel.objects.all()
         alugados = imoveis.filter(status='DISPONIVEL').count()
         reservados = imoveis.filter(status='RESERVADO').count()
@@ -178,13 +176,11 @@ class HomeViewSet(ViewSet):
             'reservados': reservados,
             'vendidos': vendidos,
         }
-
         return Response(data, status=200)
 
 class ImagemViewSet(ModelViewSet):
     serializer_class = ImagemSerializer
     queryset = Imagem.objects.all()
-
 
 class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
@@ -200,7 +196,6 @@ class UserViewSet(ModelViewSet):
         return Response(serializer.data)
  
     """ Lista empresas associadas ao usuário."""
-        
     @action(methods=['get'], detail=True) 
     def empresas(self, request, pk=None, *args, **kwargs):
        

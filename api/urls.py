@@ -1,10 +1,7 @@
-
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from .views import PredioViewSet, ImovelViewSet, ImagemViewSet, UserViewSet, HomeViewSet,  PublicViewSet,  EmpresaViewSet, ClientViewSet, ContratoViewSet
-
 from rest_framework.routers import DefaultRouter
-
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -19,8 +16,6 @@ router.register('publica', PublicViewSet, basename='publica')
 router.register('empresas', EmpresaViewSet, basename='empresas')
 router.register('clientes', ClientViewSet, basename='clientes')
 router.register('contratos', ContratoViewSet, basename='contratos')
-
-
 
 urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
